@@ -62,9 +62,9 @@ Once you have understood the above code and ran a successful Gradle sync you wil
     }
 ```
 
-Be sure to replace <APPLICATION_ROUTE> and <APPLICATION_ID> with the `appRoute` and `appGUID` parameters you previously got from your Bluemix application dashboard.
+Be sure to replace `<APPLICATION_ROUTE>` and `<APPLICATION_ID>` with the `appRoute` and `appGUID` parameters you previously got from your Bluemix application dashboard.
 
-You can now hit run your application. 
+You can now run your application. 
 
 ### Using the HelloTodo sample application
 
