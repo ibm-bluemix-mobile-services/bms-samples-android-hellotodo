@@ -36,7 +36,7 @@ Please take a moment to check out the build.gradle file (helloTodo/app/build.gra
 ```
     compile group: 'com.ibm.mobilefirstplatform.clientsdk.android',
             name: 'core',
-            version: '1.0.+',
+            version: '1.+',
             ext: 'aar',
             transitive: true
 ```
