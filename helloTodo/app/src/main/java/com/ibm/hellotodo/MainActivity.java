@@ -106,11 +106,6 @@ public class MainActivity extends Activity {
                 String todoId = Integer.toString(todoItem.idNumber);
                 Request request = new Request(client.getBluemixAppRoute() + "/api/Items/" + todoId, Request.DELETE);
 
-                // Set query params for request since DELETE needs special authorization
-                HashMap deleteParams = new HashMap();
-                deleteParams.put("OK", "OK");
-                request.setQueryParameters(deleteParams);
-
                 // Send the request and use the response listener to react
                 request.send(getApplicationContext(), new ResponseListener() {
                     // Update the list if successful
