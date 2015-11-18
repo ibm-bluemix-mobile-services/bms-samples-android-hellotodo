@@ -1,6 +1,10 @@
 # Android HelloTodo sample for IBM MobileFirst Services on IBM Bluemix
 ---
-This HelloTodo sample contains an Android project to be used to communicate with a StrongLoop based mobile backend created using MobileFirst Services Boilerplate on IBM Bluemix. Below instructions will take you step by step through a process of creating a mobile backend and getting this sample running. 
+This HelloTodo sample contains an Android project to be used to communicate with a StrongLoop based mobile backend created using MobileFirst Services Boilerplate on IBM Bluemix. You can either watch the video tutorial or follow the below instructions that take you step by step through a process of creating a mobile backend and getting this sample running.
+
+->![image](video-coming-soon.png)<-
+> We're working on creating a video tutorial. It will be published here once ready
+
 
 ### Creating a mobile backend
 Start by creating a mobile backend on IBM Bluemix by using the MobileFirst Services Boilerplate
@@ -22,18 +26,19 @@ Open the appRoute URL in your browser. You will see the web interface for the He
 (Optionally you might want to hit the "View API Reference" button on web UI to see the API specs)
 
 ### Cloning the sample
-Clone the sample to your local development environment
-```
+Clone the sample to your local development environment and open it with Android Studio
+
+```Shell
 git clone https://github.com/ibm-bluemix-mobile-services/bms-samples-android-hellotodo
 ```
 
 ### Installing Bluemix Mobile Services SDK using Gradle and Android Studio
 
-Android Studio has a built in default Gradle wrapper that will pull your Android application dependencies automatically.
+Android Studio has a built in default Gradle wrapper that will pull Android application dependencies automatically.
 
-Please take a moment to check out the build.gradle file (helloTodo/app/build.gradle) where you'll find the core mobile first SDK:
+Please take a moment to check out the build.gradle file (`helloTodo/app/build.gradle`) where you'll find the Bluemix Mobile Services SDK compile dependency:
 
-```
+```Gradle
     compile group: 'com.ibm.mobilefirstplatform.clientsdk.android',
             name: 'core',
             version: '1.+',
@@ -41,36 +46,38 @@ Please take a moment to check out the build.gradle file (helloTodo/app/build.gra
             transitive: true
 ```
 
-The above code pulls the IBM Mobile First from an IBM managed Maven repository.
+This section in build.gradle file makes Android Studio to automatically download the Bluemix Mobile Services Core SDK and add it to the project. 
 
-> Note: When creating a production app, be sure to define the version explicitly (1.0.0 for example) to ensure consistent builds.
+> Note: This sample depends on 1.+ version of the Core SDK. This means that the most recent 1.* version will be downloaded automatically. When creating a production applications it is recommended to define the version explicitly (1.0.0 for example) to ensure consistent builds.
 
-Once you have understood the above code and ran a successful Gradle sync you will be able to initialize the SDK like so: 
+Once you understand the above and ran a successful Gradle sync you will be able to initialize the SDK. Open the `MainActivity.java` class and look for the `onCreate` method.
+
+```Java
+@Override
+public void onCreate(Bundle savedInstanceState) {
+	super.onCreate(savedInstanceState);
+	setContentView(R.layout.activity_main);
+	client = BMSClient.getInstance();
+	try {
+		client.initialize(getApplicationContext(), "<APPLICATION_ROUTE>", "<APPLICATION_ID>");
+	} catch (MalformedURLException e) {
+		throw new RuntimeException(e);
+	}
+}   
 ```
-	@Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        client = BMSClient.getInstance();
-        try {
-            client.initialize(getApplicationContext(), "<APPLICATION_ROUTE>", "<APPLICATION_ID>");
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-```
-
-Be sure to replace `<APPLICATION_ROUTE>` and `<APPLICATION_ID>` with the `appRoute` and `appGUID` parameters you previously got from your Bluemix application dashboard.
+Replace `<APPLICATION_ROUTE>` and `<APPLICATION_ID>` with the `appRoute` and `appGUID` parameters you previously got from your Bluemix application dashboard.
 
 You can now run your application. 
 
 ### Using the HelloTodo sample application
 
-The HelloTodo sample a single view application with a simple list of todo items. If you previously added data through your web application you will see the data automatically pulled into the application. You can create and modify items directly in the application. Note that unlike the web UI you can also DELETE items from mobile app(press and hold) since it uses the Bluemix Mobile Services SDK which knows how to handle Mobile Client Access security. You can also mark items as completed by clicking to the left of the corresponding todo item. When you update an item in the mobile app it will automatically be updated in the web app (you will need to refresh the web UI). If you make a change in the web UI and want to see it reflected in the mobile app, simply pull down the todo list to refresh.
+The HelloTodo sample is a single view application with a simple list of todo items. If you previously added data through your web application you will see the data automatically pulled into the application. You can create and modify items directly in the application. Note that the HelloTodo sample applications uses Bluemix Mobile Services SDK which knows how to handle Mobile Client Access security. Therefore, unlike the web UI, you can also DELETE items from mobile app by long-pressing them. You can also mark items as completed by clicking to the left of the corresponding todo item. When you update an item in the mobile app it will automatically be updated in the web app (you will need to refresh the web UI). If you make a change in the web UI and want to see it reflected in the mobile app, simply pull down the todo list to refresh.
 
-As you recall the DELETE endpoint can only be accessed by mobile applications since it is protected by a Mobile Client Access service. That said, by default Mobile Client Access is not configured to require any interactive authentication (e.g. ask for username and password). Next step is learning how to use Bluemix Mobile Services would be to configure authentication using the Mobile Client Access dashboard and instrument your app with required components. You can see full tutorial explaining how to do that in this blog [link](http://)
+As you recall the DELETE endpoint can only be accessed by mobile applications since it is protected by a Mobile Client Access service. That said, by default Mobile Client Access is not configured to require any interactive authentication (e.g. ask for username and password). Next step is learning how to configure authentication using the Mobile Client Access dashboard and instrument your app with required components. You can either check [Mobile Client Documentation](https://www.ng.bluemix.net/docs/services/mobileaccess/index.html) for that or watch the below video showing the process in details. 
+
+->![image](video-coming-soon.png)<-
+> We're working on creating a video tutorial. It will be published here once ready
 
 ### License
 This package contains sample code provided in source code form. The samples are licensed under the under the Apache License, Version 2.0 (the "License"). You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 and may also view the license in the license.txt file within this package. Also see the notices.txt file within this package for additional notices.
