@@ -42,9 +42,10 @@ Open the appRoute URL in your browser. You will see the web interface for the he
 
 ### Configure the front end in the helloTodo sample
 
-Android Studio has a built in default Gradle wrapper that will pull Android application dependencies automatically.
+1. Using Android Studio, open the `bms-samples-android-hellotodo` directory where the project was cloned.
+2. Run a Gradle sync (usually starts automatically) to import the required `core` SDK. You can view the **build.gradle** file in the following directory:
 
-Please take a moment to check out the build.gradle file (`helloTodo/app/build.gradle`) where you'll find the Bluemix Mobile Services SDK compile dependency:
+	`helloTodo\app\build.gradle` where you'll find:
 
 ```Gradle
     compile group: 'com.ibm.mobilefirstplatform.clientsdk.android',
@@ -56,9 +57,10 @@ Please take a moment to check out the build.gradle file (`helloTodo/app/build.gr
 
 This section in build.gradle file makes Android Studio to automatically download the Bluemix Mobile Services Core SDK and add it to the project. 
 
-> Note: This sample depends on 1.+ version of the Core SDK. This means that the most recent 1.* version will be downloaded automatically. When creating a production applications it is recommended to define the version explicitly (1.0.0 for example) to ensure consistent builds.
+> **Note**: This sample depends on 1.+ version of the Core SDK. This means that the most recent 1.* version will be downloaded automatically. When creating a production applications it is recommended to define the version explicitly (1.0.0 for example) to ensure consistent builds.
 
-Once you understand the above and ran a successful Gradle sync you will be able to initialize the SDK. Open the `MainActivity.java` class and look for the `onCreate` method.
+3. Once that is complete, open `MainActivity.java` and locate the try block within the ```onCreate()``` function.
+4. In the ```BMSClient.getInstance().initialize()``` function replace ```<APPLICATION_ROUTE>``` and ```<APPLICATION_ID>``` with the application route and ID you were given when creating your application on Bluemix.
 
 ```Java
 @Override
@@ -73,8 +75,6 @@ public void onCreate(Bundle savedInstanceState) {
 	}
 }   
 ```
-
-Replace `<APPLICATION_ROUTE>` and `<APPLICATION_ID>` with the `appRoute` and `appGUID` parameters you previously got from your Bluemix application dashboard.
 
 You can now run your application. 
 
