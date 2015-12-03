@@ -1,41 +1,46 @@
-# Android HelloTodo sample for IBM MobileFirst Services on IBM Bluemix
+# Android HelloTodo sample for Bluemix Mobile Services
 ---
 This HelloTodo sample contains an Android project to be used to communicate with a StrongLoop based mobile backend created using MobileFirst Services Boilerplate on IBM Bluemix. You can either watch the video tutorial or follow the below instructions that take you step by step through a process of creating a mobile backend and getting this sample running.
 
 ->![image](video-coming-soon.png)<-
 > We're working on creating a video tutorial. It will be published here once ready
 
+Use the following steps to configure the helloTodo sample for Objective-C:
 
-### Creating a mobile backend
+1. [Download the helloTodo sample](#download-the-hellotodo-sample)
+2. [Configure the mobile backend for your helloTodo application](#configure-the-mobile-backend-for-your-hellotodo-application)
+3. [Configure the front end in the helloTodo sample](#configure-the-front-end-in-the-hellotodo-sample)
+4. [Run the helloTodo sample application](#run-the-hellotodo-sample-application)
 
-> If you have already followed steps described in other tutorials and created a mobile backend using MobileFirst Services Boilerplate you might want to skip to `Cloning the sample` section
+### Before you begin
+Before you start, make sure you have the following:
+
+- A [Bluemix](http://bluemix.net) account.
+
+### Download the helloTodo sample
+Clone the sample from Github with the following command:
+
+```git clone https://github.com/ibm-bluemix-mobile-services/bms-samples-android-hellotodo```
+
+### Configure the mobile backend for your helloTodo application
+
+> If you have already followed steps described in other tutorials and created a mobile backend using MobileFirst Services Boilerplate you might want to skip to the [Configuring the front end in the helloTodo sample](#configuring-the-front-end-in-the-hellotodo-sample) section
  
-Start by creating a mobile backend on IBM Bluemix by using the MobileFirst Services Boilerplate
+Before you can run the helloTodo application, you must set up an app on Bluemix.  The following procedure shows you how to create a MobileFirst Services Starter application. This will provision a Node.JS runtime and populate it with with a default helloTodo application created using StrongLoop. This application uses LoopBack framework to expose the `/api/Items` API which will be used by both Web UI and the helloTodo app sample from this Github repository. . The Cloudant®NoSQL DB, IBM Push Notifications, and Mobile Client Access services are also added to the app.
 
-1. Log in into your IBM Bluemix account
-2. Open Bluemix Catalog [https://console.ng.bluemix.net/catalog/](https://console.ng.bluemix.net/catalog/)
-3. Find and select the MobileFirst Services Starter under the Boilerplates section
-4. Select the space you want to add your mobile backend to
-5. Enter the name and host for your mobile backend. 
-6. Optionally you can change the plans
-7. Click CREATE button
+Create a mobile backend in the  Bluemix dashboard:
 
-As a result of the above steps IBM Bluemix will provision a Node.JS runtime and populate it with with a default HelloTodo application created using StrongLoop. This application uses LoopBack framework to expose the `/api/Items` API which will be used by both Web UI and the HelloTodo app sample from this Github repository. 
+1.	In the **Boilerplates** section of the Bluemix catalog, click **MobileFirst Services Starter**.
+2.	Enter a name and host for your mobile backend and click **Create**.
+3.	Click **Finish**.
 
-Once the above provisioning process is complete you'll be taken to a Bluemix Dashboard for your newly provisioned mobile backend. Click the `Mobile Options` link in top right part of a screen to find your `appRoute` and `appGUID`. Keep this screen open in your browser as you you will need these parameters shortly. 
+Once the above provisioning process is complete you'll be taken to a Bluemix Dashboard for your newly provisioned mobile backend. Click the **Mobile Options** link in top right part of a screen to find your **appRoute* and *appGUID*. Keep this screen open in your browser as you you will need these parameters shortly. 
 
-Open the appRoute URL in your browser. You will see the web interface for the HelloTodo backend. Start by following the guided experience steps described in the web UI. Eventually you will try to DELETE a todo item and will discover that this action can only be complete when using the HelloTodo mobile apps sample from this Github repository. This is due to a fact that the mobile backend is by default protected by a Mobile Client Access - a Bluemix service that provides security and monitoring functionality for mobile backends. Following steps will guide you through obtaining and running the HelloTodo mobile application. 
+Open the appRoute URL in your browser. You will see the web interface for the helloTodo backend. Start by following the guided experience steps described in the web UI. Eventually you will try to DELETE a todo item and will discover that this action can only be complete when using the helloTodo mobile apps sample from this Github repository. This is due to a fact that the mobile backend is by default protected by a Mobile Client Access - a Bluemix service that provides security and monitoring functionality for mobile backends. Following steps will guide you through obtaining and running the helloTodo mobile application. 
 
 (Optionally you might want to hit the "View API Reference" button on web UI to see the API specs)
 
-### Cloning the sample
-Clone the sample to your local development environment and open it with Android Studio
-
-```Shell
-git clone https://github.com/ibm-bluemix-mobile-services/bms-samples-android-hellotodo
-```
-
-### Installing Bluemix Mobile Services SDK using Gradle and Android Studio
+### Configure the front end in the helloTodo sample
 
 Android Studio has a built in default Gradle wrapper that will pull Android application dependencies automatically.
 
@@ -73,7 +78,7 @@ Replace `<APPLICATION_ROUTE>` and `<APPLICATION_ID>` with the `appRoute` and `ap
 
 You can now run your application. 
 
-### Using the HelloTodo sample application
+### Run the helloTodo sample application
 
 The HelloTodo sample is a single view application with a simple list of todo items. If you previously added data through your web application you will see the data automatically pulled into the application. You can create and modify items directly in the application. Note that the HelloTodo sample applications uses Bluemix Mobile Services SDK which knows how to handle Mobile Client Access security. Therefore, unlike the web UI, you can also DELETE items from mobile app by long-pressing them. You can also mark items as completed by clicking to the left of the corresponding todo item. When you update an item in the mobile app it will automatically be updated in the web app (you will need to refresh the web UI). If you make a change in the web UI and want to see it reflected in the mobile app, simply pull down the todo list to refresh.
 
