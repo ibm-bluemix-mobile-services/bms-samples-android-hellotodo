@@ -66,6 +66,7 @@ public class MainActivity extends Activity {
         client = BMSClient.getInstance();
         try {
 			//initialize SDK with IBM Bluemix application ID and route
+			// You can find your backendRoute and backendGUID in the Mobile Options section on top of your Bluemix application dashboard
             //TODO: Please replace <APPLICATION_ROUTE> with a valid ApplicationRoute and <APPLICATION_ID> with a valid ApplicationId
             client.initialize(getApplicationContext(), "https://hellotodo-with-strongloop.mybluemix.net", "bb75fe75-d37f-46f0-8bab-053bbe554b2f");
         } catch (MalformedURLException e) {
