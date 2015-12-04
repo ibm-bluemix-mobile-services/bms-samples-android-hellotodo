@@ -65,7 +65,9 @@ public class MainActivity extends Activity {
 
         client = BMSClient.getInstance();
         try {
-            client.initialize(getApplicationContext(), "<APPLICATION_ROUTE>", "<APPLICATION_ID>");
+			//initialize SDK with IBM Bluemix application ID and route
+            //TODO: Please replace <APPLICATION_ROUTE> with a valid ApplicationRoute and <APPLICATION_ID> with a valid ApplicationId
+            client.initialize(getApplicationContext(), "https://hellotodo-with-strongloop.mybluemix.net", "bb75fe75-d37f-46f0-8bab-053bbe554b2f");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -162,7 +164,7 @@ public class MainActivity extends Activity {
         // Identify and send GET Request with response listener
         Request request = new Request(client.getBluemixAppRoute()+"/api/Items", Request.GET);
         request.send(getApplicationContext(), new ResponseListener() {
-            // Loop through JSON response and create local TodoItems if successfull
+            // Loop through JSON response and create local TodoItems if successful
             @Override
             public void onSuccess(Response response) {
                 if (response.getStatus() != 200) {
