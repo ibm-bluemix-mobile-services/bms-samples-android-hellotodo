@@ -37,7 +37,10 @@ import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +71,7 @@ public class MainActivity extends Activity {
 			//initialize SDK with IBM Bluemix application ID and route
 			//You can find your backendRoute and backendGUID in the Mobile Options section on top of your Bluemix application dashboard
             //TODO: Please replace <APPLICATION_ROUTE> with a valid ApplicationRoute and <APPLICATION_ID> with a valid ApplicationId
-            client.initialize(this, "<APPLICATION_ROUTE>", "<APPLICATION_ID>");
+            client.initialize(this, "http://drctest.mybluemix.net", "a0214805-e7b1-4b43-880d-2f1c8bb8bf74");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -122,17 +125,27 @@ public class MainActivity extends Activity {
                     // If the request fails, log the errors
                     @Override
                     public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
+                        String errorMessage = "";
 
-                        if (t != null) {
-                            Log.e(TAG, "deleteItem failed with error: " + t.getLocalizedMessage());
-                        } else if (response != null) {
-                            Log.e(TAG, "deleteItem failed with error: " + response.toString());
-                        } else if (extendedInfo != null) {
-                            Log.e(TAG, "deleteItem failed with error: " + extendedInfo.toString());
-                        } else {
-                            Log.e(TAG, "deleteItem failed with error: Reason Unkown");
+                        if (response != null) {
+                            errorMessage += response.toString() + "\n";
                         }
 
+                        if (t != null) {
+                            StringWriter sw = new StringWriter();
+                            PrintWriter pw = new PrintWriter(sw);
+                            t.printStackTrace(pw);
+                            errorMessage += "THROWN" + sw.toString() + "\n";
+                        }
+
+                        if (extendedInfo != null){
+                            errorMessage += "EXTENDED_INFO" + extendedInfo.toString() + "\n";
+                        }
+
+                        if (errorMessage.isEmpty())
+                            errorMessage = "Request Failed With Unknown Error.";
+
+                        Log.e(TAG, "deleteItem failed with error: " + errorMessage);
                     }
                 });
 
@@ -169,7 +182,7 @@ public class MainActivity extends Activity {
             @Override
             public void onSuccess(Response response) {
                 if (response.getStatus() != 200) {
-                    Log.e("MainActivity", "Error pulling items from Bluemix: " + response.toString());
+                    Log.e(TAG, "Error pulling items from Bluemix: " + response.toString());
                 } else {
 
                     try {
@@ -201,23 +214,45 @@ public class MainActivity extends Activity {
                         });
 
                     } catch (Exception e) {
-                        Log.e("MainActivity", "Error reading response JSON: " + e.getLocalizedMessage());
+                        Log.e(TAG, "Error reading response JSON: " + e.getLocalizedMessage());
                     }
                 }
             }
 
             // Log Errors on failure
             @Override
-            public void onFailure(Response response, Throwable throwable, JSONObject jsonObject) {
-                if (throwable != null) {
-                    Log.e("MainActivity", "Failed sending request to Bluemix: " + throwable.getLocalizedMessage());
-                } else if (response != null) {
-                    Log.e("MainActivity", "Failed sending request to Bluemix: " + response.toString());
-                } else if (jsonObject != null) {
-                    Log.e("MainActivity", "Failed sending request to Bluemix: " + jsonObject.toString());
-                } else {
-                    Log.e("MainActivity", "Failed sending request to Bluemix: Reason Unkown");
+            public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
+                String errorMessage = "";
+
+                // Check for 404s and unknown host exception since this is the first request made by the app
+                if (response != null) {
+                    if (response.getStatus() == 404) {
+                        errorMessage += "Application Route not found at:\n" + BMSClient.getInstance().getBluemixAppRoute() +
+                                "\nPlease verify your Application Route and rebuild the app.";
+                    } else {
+                        errorMessage += response.toString() + "\n";
+                    }
                 }
+
+                if (t != null) {
+                    if (t.getClass().equals(UnknownHostException.class)) {
+                        errorMessage = "Unable to access Bluemix host!\nPlease verify internet connectivity and try again.";
+                    } else {
+                        StringWriter sw = new StringWriter();
+                        PrintWriter pw = new PrintWriter(sw);
+                        t.printStackTrace(pw);
+                        errorMessage += "THROWN" + sw.toString() + "\n";
+                    }
+                }
+
+                if (extendedInfo != null){
+                    errorMessage += "EXTENDED_INFO" + extendedInfo.toString() + "\n";
+                }
+
+                if (errorMessage.isEmpty())
+                    errorMessage = "Request Failed With Unknown Error.";
+
+                Log.e(TAG, "loadList failed with error: " + errorMessage);
             }
         });
     }
@@ -272,7 +307,7 @@ public class MainActivity extends Activity {
                         // On success, update local list with new TodoItem
                         @Override
                         public void onSuccess(Response response) {
-                            Log.i("MainActivity", "Item created successfully");
+                            Log.i(TAG, "Item created successfully");
 
                             loadList();
                         }
@@ -280,16 +315,27 @@ public class MainActivity extends Activity {
                         // On failure, log errors
                         @Override
                         public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
+                            String errorMessage = "";
+
                             if (response != null) {
-                                Log.e("MainActivity", "createItem failed with error: " + response.getResponseText());
-                            }
-                            if (t != null) {
-                                Log.e("MainActivity", "createItem failed with error: " + t.getLocalizedMessage(), t);
-                            }
-                            if (extendedInfo != null) {
-                                Log.e("MainActivity", "createItem failed with error: " + extendedInfo.toString());
+                                errorMessage += response.toString() + "\n";
                             }
 
+                            if (t != null) {
+                                StringWriter sw = new StringWriter();
+                                PrintWriter pw = new PrintWriter(sw);
+                                t.printStackTrace(pw);
+                                errorMessage += "THROWN" + sw.toString() + "\n";
+                            }
+
+                            if (extendedInfo != null){
+                                errorMessage += "EXTENDED_INFO" + extendedInfo.toString() + "\n";
+                            }
+
+                            if (errorMessage.isEmpty())
+                                errorMessage = "Request Failed With Unknown Error.";
+
+                            Log.e(TAG, "addTodo failed with error: " + errorMessage);
                         }
                     });
                 }
@@ -358,7 +404,7 @@ public class MainActivity extends Activity {
                         // On success, update local list with updated TodoItem
                         @Override
                         public void onSuccess(Response response) {
-                            Log.i("MainActivity", "Item updated successfully");
+                            Log.i(TAG, "Item updated successfully");
 
                             loadList();
                         }
@@ -366,16 +412,27 @@ public class MainActivity extends Activity {
                         // On failure, log errors
                         @Override
                         public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
+                            String errorMessage = "";
+
                             if (response != null) {
-                                Log.e("MainActivity", "updateItem failed with error: " + response.getResponseText());
-                            }
-                            if (t != null) {
-                                Log.e("MainActivity", "updateItem failed with error: " + t.getLocalizedMessage(), t);
-                            }
-                            if (extendedInfo != null) {
-                                Log.e("MainActivity", "updateItem failed with error: " + extendedInfo.toString());
+                                errorMessage += response.toString() + "\n";
                             }
 
+                            if (t != null) {
+                                StringWriter sw = new StringWriter();
+                                PrintWriter pw = new PrintWriter(sw);
+                                t.printStackTrace(pw);
+                                errorMessage += "THROWN" + sw.toString() + "\n";
+                            }
+
+                            if (extendedInfo != null){
+                                errorMessage += "EXTENDED_INFO" + extendedInfo.toString() + "\n";
+                            }
+
+                            if (errorMessage.isEmpty())
+                                errorMessage = "Request Failed With Unknown Error.";
+
+                            Log.e(TAG, "editTodoName failed with error: " + errorMessage);
                         }
                     });
 
@@ -417,7 +474,7 @@ public class MainActivity extends Activity {
             // On success, update local list with updated TodoItem
             @Override
             public void onSuccess(Response response) {
-                Log.i("MainActivity", "Item completeness updated successfully");
+                Log.i(TAG, "Item completeness updated successfully");
 
                 loadList();
             }
@@ -425,15 +482,27 @@ public class MainActivity extends Activity {
             // On failure, log errors
             @Override
             public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
+                String errorMessage = "";
+
                 if (response != null) {
-                    Log.e("MainActivity", "isDoneToggle failed with error: " + response.getResponseText());
+                    errorMessage += response.toString() + "\n";
                 }
+
                 if (t != null) {
-                    Log.e("MainActivity", "isDoneToggle failed with error: " + t.getLocalizedMessage(), t);
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    t.printStackTrace(pw);
+                    errorMessage += "THROWN" + sw.toString() + "\n";
                 }
-                if (extendedInfo != null) {
-                    Log.e("MainActivity", "isDoneToggle failed with error: " + extendedInfo.toString());
+
+                if (extendedInfo != null){
+                    errorMessage += "EXTENDED_INFO" + extendedInfo.toString() + "\n";
                 }
+
+                if (errorMessage.isEmpty())
+                    errorMessage = "Request Failed With Unknown Error.";
+
+                Log.e(TAG, "isDoneToggle failed with error: " + errorMessage);
             }
         });
 
