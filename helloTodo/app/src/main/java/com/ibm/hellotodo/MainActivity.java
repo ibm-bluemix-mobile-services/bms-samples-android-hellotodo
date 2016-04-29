@@ -300,7 +300,7 @@ public class MainActivity extends Activity {
                     List<String> accept = new ArrayList<>();
                     accept.add("Application/json");
 
-                    headers.put("Content-Type", cType);
+                    headers.put("Content-Type", contentType);
                     headers.put("Accept", accept);
 
                     request.setHeaders(headers);
@@ -366,7 +366,7 @@ public class MainActivity extends Activity {
             textView.setGravity(Gravity.CENTER);
         }
         editDialog.setCancelable(true);
-        EditText todoName = (EditText) addDialog.findViewById(R.id.todo);
+        EditText todoName = (EditText) editDialog.findViewById(R.id.todo);
 
 	// Get selected TodoItem values
         final String name = mTodoItemList.get(pos).text;
@@ -378,11 +378,11 @@ public class MainActivity extends Activity {
         editDialog.show();
 
         // When done is pressed, send PUT request to update TodoItem on Bluemix
-        addDone.setOnClickListener(new View.OnClickListener() {
+        editDone.setOnClickListener(new View.OnClickListener() {
             // Save inputted text when done is tapped
             @Override
             public void onClick(View view) {
-                EditText editedText = (EditText) addDialog.findViewById(R.id.todo);
+                EditText editedText = (EditText) editDialog.findViewById(R.id.todo);
 
                 String updatedName = editedText.getText().toString();
 
@@ -399,7 +399,7 @@ public class MainActivity extends Activity {
                     List<String> accept = new ArrayList<>();
                     accept.add("Application/json");
 
-                    headers.put("Content-Type", cType);
+                    headers.put("Content-Type", contentType);
                     headers.put("Accept", accept);
 
                     request.setHeaders(headers);
@@ -440,7 +440,7 @@ public class MainActivity extends Activity {
                         }
                     });
                 }
-                addDialog.dismiss();
+                editDialog.dismiss();
             }
         });
     }
@@ -470,7 +470,7 @@ public class MainActivity extends Activity {
         List<String> accept = new ArrayList<>();
         accept.add("Application/json");
 
-        headers.put("Content-Type", cType);
+        headers.put("Content-Type", contentType);
         headers.put("Accept", accept);
 
         request.setHeaders(headers);
