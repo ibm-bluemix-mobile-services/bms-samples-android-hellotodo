@@ -35,6 +35,7 @@ import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.PrintWriter;
@@ -58,7 +59,7 @@ public class MainActivity extends Activity {
 
     private SwipeRefreshLayout mSwipeLayout; // Swipe refresh to update local app if backend has changed
 
-    private BMSClient client; // IBM Mobile First Client SDK
+    private BMSClient bmsClient; // IBM Mobile First Client SDK
 
 
     @Override
@@ -66,19 +67,19 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        client = BMSClient.getInstance();
+        bmsClient = BMSClient.getInstance();
         try {
 			//initialize SDK with IBM Bluemix application ID and route
 			//You can find your backendRoute and backendGUID in the Mobile Options section on top of your Bluemix application dashboard
             //TODO: Please replace <APPLICATION_ROUTE> with a valid ApplicationRoute and <APPLICATION_ID> with a valid ApplicationId
-            client.initialize(this, "<APPLICATION_ROUTE>", "<APPLICATION_ID>");
+            bmsClient.initialize(this, "<APPLICATION_ROUTE>", "<APPLICATION_ID>");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
 
+        // Init UI
         initListView();
         initSwipeRefresh();
-        loadList();
     }
 
     @Override
@@ -106,18 +107,19 @@ public class MainActivity extends Activity {
             public boolean onItemLongClick(android.widget.AdapterView<?> parent, View view, int position, long id) {
 
                 // Grab TodoItem that was long clicked for deletion
-                TodoItem todoItem = mTodoItemList.get(position);
+                final TodoItem todoItem = mTodoItemList.get(position);
 
                 // Grab TodoItem id number and append to the DELETE REST request using the Bluemix Mobile Services Client SDK
                 String todoId = Integer.toString(todoItem.idNumber);
-                Request request = new Request(client.getBluemixAppRoute() + "/api/Items/" + todoId, Request.DELETE);
+                Request request = new Request(bmsClient.getBluemixAppRoute() + "/api/Items/" + todoId, Request.DELETE);
 
                 // Send the request and use the response listener to react
                 request.send(getApplicationContext(), new ResponseListener() {
                     // Update the list if successful
                     @Override
                     public void onSuccess(Response response) {
-                        Log.i(TAG, "Item deleted successfully");
+
+                        Log.i(TAG, "Item " + todoItem.text + " deleted successfully");
 
                         loadList();
                     }
@@ -127,7 +129,7 @@ public class MainActivity extends Activity {
                     public void onFailure(Response response, Throwable throwable, JSONObject extendedInfo) {
                         String errorMessage = "";
 
-			// different responses can cause different parameters to be null, be sure to check for those cases
+			            // different responses can cause different parameters to be null, be sure to check for those cases
                         if (response != null) {
                             errorMessage += response.toString() + "\n";
                         }
@@ -177,7 +179,7 @@ public class MainActivity extends Activity {
     private void loadList() {
 
         // Send GET Request to Bluemix backend to retreive item list with response listener
-        Request request = new Request(client.getBluemixAppRoute()+"/api/Items", Request.GET);
+        Request request = new Request(bmsClient.getBluemixAppRoute()+"/api/Items", Request.GET);
         request.send(getApplicationContext(), new ResponseListener() {
             // Loop through JSON response and create an array of local TodoItems if successful
             @Override
@@ -201,9 +203,11 @@ public class MainActivity extends Activity {
                             tempTodo.isDone = tempTodoJSON.getBoolean("isDone");
 
                             mTodoItemList.add(tempTodo);
+
+                            Log.i(TAG, "List updated successfully");
                         }
 
-			// Need to update adapater on main thread in order for list changes to update visually
+			            // Need to update adapater on main thread in order for list changes to update visually
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -292,7 +296,7 @@ public class MainActivity extends Activity {
                     String json = "{\"text\":\"" + name + "\",\"isDone\":false,\"id\":0}";
 
                     // Create POST request with Bluemix Mobile Services SDK and set HTTP headers so Bluemix knows what to expect in the request
-                    Request request = new Request(client.getBluemixAppRoute() + "/api/Items", Request.POST);
+                    Request request = new Request(bmsClient.getBluemixAppRoute() + "/api/Items", Request.POST);
 
                     HashMap headers = new HashMap();
                     List<String> contentType = new ArrayList<>();
@@ -309,7 +313,8 @@ public class MainActivity extends Activity {
                         // On success, update local list with new TodoItem
                         @Override
                         public void onSuccess(Response response) {
-                            Log.i(TAG, "Item created successfully");
+
+                            Log.i(TAG, "Item " + name + " created successfully");
 
                             loadList();
                         }
@@ -384,14 +389,14 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 EditText editedText = (EditText) editDialog.findViewById(R.id.todo);
 
-                String updatedName = editedText.getText().toString();
+                final String updatedName = editedText.getText().toString();
 
                 // If new text is not empty, create JSON with updated info and send PUT request
                 if (!updatedName.isEmpty()) {
                     String json = "{\"text\":\"" + updatedName + "\",\"isDone\":" + isDone + ",\"id\":" + id + "}";
 
                     // Create PUT REST request using the Bluemix Mobile Services SDK and set HTTP headers so Bluemix knows what to expect in the request
-                    Request request = new Request(client.getBluemixAppRoute() + "/api/Items", Request.PUT);
+                    Request request = new Request(bmsClient.getBluemixAppRoute() + "/api/Items", Request.PUT);
 
                     HashMap headers = new HashMap();
                     List<String> contentType = new ArrayList<>();
@@ -408,7 +413,7 @@ public class MainActivity extends Activity {
                         // On success, update local list with updated TodoItem
                         @Override
                         public void onSuccess(Response response) {
-                            Log.i(TAG, "Item updated successfully");
+                            Log.i(TAG, "Item " + updatedName + " updated successfully");
 
                             loadList();
                         }
@@ -454,14 +459,14 @@ public class MainActivity extends Activity {
      */
     public void isDoneToggle(View view) {
         Integer position = mListView.getPositionForView(view);
-        TodoItem todoItem = mTodoItemList.get(position);
+        final TodoItem todoItem = mTodoItemList.get(position);
 
         boolean isDone = !todoItem.isDone;
 
         String json = "{\"text\":\"" + todoItem.text + "\",\"isDone\":" + isDone + ",\"id\":" + todoItem.idNumber + "}";
 
         // Create PUT REST request using the Bluemix Mobile Services SDK and set HTTP headers so Bluemix knows what to expect in the request
-        Request request = new Request(client.getBluemixAppRoute() + "/api/Items", Request.PUT);
+        Request request = new Request(bmsClient.getBluemixAppRoute() + "/api/Items", Request.PUT);
 
         HashMap headers = new HashMap();
 
@@ -479,7 +484,7 @@ public class MainActivity extends Activity {
             // On success, update local list with updated TodoItem
             @Override
             public void onSuccess(Response response) {
-                Log.i(TAG, "Item completeness updated successfully");
+                Log.i(TAG, todoItem.text + " completeness updated successfully");
 
                 loadList();
             }
