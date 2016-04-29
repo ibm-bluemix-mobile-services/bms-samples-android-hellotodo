@@ -1,7 +1,7 @@
 package com.ibm.hellotodo;
 
 /**
- * Copyright 2015 IBM Corp. All Rights Reserved.
+ * Copyright 2015, 2016 IBM Corp. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,10 +105,10 @@ public class MainActivity extends Activity {
             @Override
             public boolean onItemLongClick(android.widget.AdapterView<?> parent, View view, int position, long id) {
 
-                // Grab TodoItem to delete from current showing list
+                // Grab TodoItem that was long clicked for deletion
                 TodoItem todoItem = mTodoItemList.get(position);
 
-                // Grab TodoItem id number and append to the DELETE rest request using the IBM Mobile First Client SDK
+                // Grab TodoItem id number and append to the DELETE REST request using the Bluemix Mobile Services Client SDK
                 String todoId = Integer.toString(todoItem.idNumber);
                 Request request = new Request(client.getBluemixAppRoute() + "/api/Items/" + todoId, Request.DELETE);
 
@@ -117,24 +117,25 @@ public class MainActivity extends Activity {
                     // Update the list if successful
                     @Override
                     public void onSuccess(Response response) {
-                        Log.i(TAG, "Item  deleted successfully");
+                        Log.i(TAG, "Item deleted successfully");
 
                         loadList();
                     }
 
                     // If the request fails, log the errors
                     @Override
-                    public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
+                    public void onFailure(Response response, Throwable throwable, JSONObject extendedInfo) {
                         String errorMessage = "";
 
+			// different responses can cause different parameters to be null, be sure to check for those cases
                         if (response != null) {
                             errorMessage += response.toString() + "\n";
                         }
 
-                        if (t != null) {
+                        if (throwable != null) {
                             StringWriter sw = new StringWriter();
                             PrintWriter pw = new PrintWriter(sw);
-                            t.printStackTrace(pw);
+                            throwable.printStackTrace(pw);
                             errorMessage += "THROWN" + sw.toString() + "\n";
                         }
 
@@ -161,7 +162,7 @@ public class MainActivity extends Activity {
 
         mSwipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
 
-        // Set swipe refresh listener to update the local list on pull down
+        // Set swipe refresh listener to update the local list on swipe down
         mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -171,14 +172,14 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * Uses IBM Mobile First SDK to get the TodoItems from Bluemix and updates the local list
+     * Uses Bluemix Mobile Services SDK to get the TodoItems from Bluemix and updates the local list
      */
     private void loadList() {
 
-        // Identify and send GET Request with response listener
+        // Send GET Request to Bluemix backend to retreive item list with response listener
         Request request = new Request(client.getBluemixAppRoute()+"/api/Items", Request.GET);
         request.send(getApplicationContext(), new ResponseListener() {
-            // Loop through JSON response and create local TodoItems if successful
+            // Loop through JSON response and create an array of local TodoItems if successful
             @Override
             public void onSuccess(Response response) {
                 if (response.getStatus() != 200) {
@@ -192,16 +193,17 @@ public class MainActivity extends Activity {
                         JSONArray jsonArray = new JSONArray(response.getResponseText());
 
                         for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject temp = jsonArray.getJSONObject(i);
+                            JSONObject tempTodoJSON = jsonArray.getJSONObject(i);
                             TodoItem tempTodo = new TodoItem();
 
-                            tempTodo.idNumber = temp.getInt("id");
-                            tempTodo.text = temp.getString("text");
-                            tempTodo.isDone = temp.getBoolean("isDone");
+                            tempTodo.idNumber = tempTodoJSON.getInt("id");
+                            tempTodo.text = tempTodoJSON.getString("text");
+                            tempTodo.isDone = tempTodoJSON.getBoolean("isDone");
 
                             mTodoItemList.add(tempTodo);
                         }
 
+			// Need to update adapater on main thread in order for list changes to update visually
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -221,7 +223,7 @@ public class MainActivity extends Activity {
 
             // Log Errors on failure
             @Override
-            public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
+            public void onFailure(Response response, Throwable throwable, JSONObject extendedInfo) {
                 String errorMessage = "";
 
                 // Check for 404s and unknown host exception since this is the first request made by the app
@@ -234,13 +236,13 @@ public class MainActivity extends Activity {
                     }
                 }
 
-                if (t != null) {
-                    if (t.getClass().equals(UnknownHostException.class)) {
+                if (throwable != null) {
+                    if (throwable.getClass().equals(UnknownHostException.class)) {
                         errorMessage = "Unable to access Bluemix host!\nPlease verify internet connectivity and try again.";
                     } else {
                         StringWriter sw = new StringWriter();
                         PrintWriter pw = new PrintWriter(sw);
-                        t.printStackTrace(pw);
+                        throwable.printStackTrace(pw);
                         errorMessage += "THROWN" + sw.toString() + "\n";
                     }
                 }
@@ -266,18 +268,18 @@ public class MainActivity extends Activity {
 
         final Dialog addDialog = new Dialog(this);
 
+	// UI settings for dialog pop-up
         addDialog.setContentView(R.layout.add_edit_dialog);
         addDialog.setTitle("Add Todo");
         TextView textView = (TextView) addDialog.findViewById(android.R.id.title);
         if (textView != null) {
             textView.setGravity(Gravity.CENTER);
         }
-
         addDialog.setCancelable(true);
         Button add = (Button) addDialog.findViewById(R.id.Add);
         addDialog.show();
 
-        // When done is pressed, send POST request to create TodoItem on Bluemix
+        // When done is pressed, send POST request to create new TodoItem on Bluemix
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -289,12 +291,12 @@ public class MainActivity extends Activity {
                     // Create JSON for new TodoItem, id should be 0 for new items
                     String json = "{\"text\":\"" + name + "\",\"isDone\":false,\"id\":0}";
 
-                    // Create POST request with IBM Mobile First SDK and set HTTP headers so Bluemix knows what to expect in the request
+                    // Create POST request with Bluemix Mobile Services SDK and set HTTP headers so Bluemix knows what to expect in the request
                     Request request = new Request(client.getBluemixAppRoute() + "/api/Items", Request.POST);
 
                     HashMap headers = new HashMap();
-                    List<String> cType = new ArrayList<>();
-                    cType.add("application/json");
+                    List<String> contentType = new ArrayList<>();
+                    contentType.add("application/json");
                     List<String> accept = new ArrayList<>();
                     accept.add("Application/json");
 
@@ -314,17 +316,17 @@ public class MainActivity extends Activity {
 
                         // On failure, log errors
                         @Override
-                        public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
+                        public void onFailure(Response response, Throwable throwable, JSONObject extendedInfo) {
                             String errorMessage = "";
 
                             if (response != null) {
                                 errorMessage += response.toString() + "\n";
                             }
 
-                            if (t != null) {
+                            if (throwable != null) {
                                 StringWriter sw = new StringWriter();
                                 PrintWriter pw = new PrintWriter(sw);
-                                t.printStackTrace(pw);
+                                throwable.printStackTrace(pw);
                                 errorMessage += "THROWN" + sw.toString() + "\n";
                             }
 
@@ -340,7 +342,7 @@ public class MainActivity extends Activity {
                     });
                 }
 
-                // Kill dialog when finished, or if no text was added
+                // Close dialog when finished, or if no text was added
                 addDialog.dismiss();
             }
         });
@@ -354,44 +356,46 @@ public class MainActivity extends Activity {
     public void editTodoName(View view) {
         // Gets position in list view of tapped item
         final Integer pos = mListView.getPositionForView(view);
-        final Dialog addDialog = new Dialog(this);
+        final Dialog editDialog = new Dialog(this);
 
-        addDialog.setContentView(R.layout.add_edit_dialog);
-        addDialog.setTitle("Edit Todo");
-        TextView textView = (TextView) addDialog.findViewById(android.R.id.title);
+	// UI settings for dialog pop-up
+        editDialog.setContentView(R.layout.add_edit_dialog);
+        editDialog.setTitle("Edit Todo");
+        TextView textView = (TextView) editDialog.findViewById(android.R.id.title);
         if (textView != null) {
             textView.setGravity(Gravity.CENTER);
         }
-        addDialog.setCancelable(true);
-        EditText et = (EditText) addDialog.findViewById(R.id.todo);
+        editDialog.setCancelable(true);
+        EditText todoName = (EditText) addDialog.findViewById(R.id.todo);
 
+	// Get selected TodoItem values
         final String name = mTodoItemList.get(pos).text;
         final boolean isDone = mTodoItemList.get(pos).isDone;
         final int id = mTodoItemList.get(pos).idNumber;
-        et.setText(name);
+        todoName.setText(name);
 
-        Button addDone = (Button) addDialog.findViewById(R.id.Add);
-        addDialog.show();
+        Button editDone = (Button) editDialog.findViewById(R.id.Add);
+        editDialog.show();
 
         // When done is pressed, send PUT request to update TodoItem on Bluemix
         addDone.setOnClickListener(new View.OnClickListener() {
-            // Save text inputted when done is tapped
+            // Save inputted text when done is tapped
             @Override
             public void onClick(View view) {
                 EditText editedText = (EditText) addDialog.findViewById(R.id.todo);
 
-                String newName = editedText.getText().toString();
+                String updatedName = editedText.getText().toString();
 
                 // If new text is not empty, create JSON with updated info and send PUT request
-                if (!newName.isEmpty()) {
-                    String json = "{\"text\":\"" + newName + "\",\"isDone\":" + isDone + ",\"id\":" + id + "}";
+                if (!updatedName.isEmpty()) {
+                    String json = "{\"text\":\"" + updatedName + "\",\"isDone\":" + isDone + ",\"id\":" + id + "}";
 
-                    // Create PUT REST request using the IBM Mobile First SDK and set HTTP headers so Bluemix knows what to expect in the request
+                    // Create PUT REST request using the Bluemix Mobile Services SDK and set HTTP headers so Bluemix knows what to expect in the request
                     Request request = new Request(client.getBluemixAppRoute() + "/api/Items", Request.PUT);
 
                     HashMap headers = new HashMap();
-                    List<String> cType = new ArrayList<>();
-                    cType.add("application/json");
+                    List<String> contentType = new ArrayList<>();
+                    contentType.add("application/json");
                     List<String> accept = new ArrayList<>();
                     accept.add("Application/json");
 
@@ -411,17 +415,17 @@ public class MainActivity extends Activity {
 
                         // On failure, log errors
                         @Override
-                        public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
+                        public void onFailure(Response response, Throwable throwable, JSONObject extendedInfo) {
                             String errorMessage = "";
 
                             if (response != null) {
                                 errorMessage += response.toString() + "\n";
                             }
 
-                            if (t != null) {
+                            if (throwable != null) {
                                 StringWriter sw = new StringWriter();
                                 PrintWriter pw = new PrintWriter(sw);
-                                t.printStackTrace(pw);
+                                throwable.printStackTrace(pw);
                                 errorMessage += "THROWN" + sw.toString() + "\n";
                             }
 
@@ -435,7 +439,6 @@ public class MainActivity extends Activity {
                             Log.e(TAG, "editTodoName failed with error: " + errorMessage);
                         }
                     });
-
                 }
                 addDialog.dismiss();
             }
@@ -443,25 +446,27 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * Changes completed image and flips TodoItem isDone boolean value. Same request as editTodoName.
+     * When TodoItem image is tapped, switch boolean isDone value to indicate current completion status.
+     * The TodoItem is updated on Bluemix and then the list is refreshed to reflect new status.
+     * Uses same REST request as editTodoName.
      *
      * @param view The TodoItem that has been tapped.
      */
     public void isDoneToggle(View view) {
-        Integer pos = mListView.getPositionForView(view);
-        TodoItem todoItem = mTodoItemList.get(pos);
+        Integer position = mListView.getPositionForView(view);
+        TodoItem todoItem = mTodoItemList.get(position);
 
         boolean isDone = !todoItem.isDone;
 
         String json = "{\"text\":\"" + todoItem.text + "\",\"isDone\":" + isDone + ",\"id\":" + todoItem.idNumber + "}";
 
-        // Create PUT REST request using the IBM Mobile First SDK and set HTTP headers so Bluemix knows what to expect in the request
+        // Create PUT REST request using the Bluemix Mobile Services SDK and set HTTP headers so Bluemix knows what to expect in the request
         Request request = new Request(client.getBluemixAppRoute() + "/api/Items", Request.PUT);
 
         HashMap headers = new HashMap();
 
-        List<String> cType = new ArrayList<>();
-        cType.add("application/json");
+        List<String> contentType = new ArrayList<>();
+        contentType.add("application/json");
         List<String> accept = new ArrayList<>();
         accept.add("Application/json");
 
@@ -481,17 +486,17 @@ public class MainActivity extends Activity {
 
             // On failure, log errors
             @Override
-            public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
+            public void onFailure(Response response, Throwable throwable, JSONObject extendedInfo) {
                 String errorMessage = "";
 
                 if (response != null) {
                     errorMessage += response.toString() + "\n";
                 }
 
-                if (t != null) {
+                if (throwable != null) {
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new PrintWriter(sw);
-                    t.printStackTrace(pw);
+                    throwable.printStackTrace(pw);
                     errorMessage += "THROWN" + sw.toString() + "\n";
                 }
 
