@@ -203,16 +203,15 @@ public class MainActivity extends Activity {
                             tempTodo.isDone = tempTodoJSON.getBoolean("isDone");
 
                             mTodoItemList.add(tempTodo);
-
-                            Log.i(TAG, "List updated successfully");
                         }
 
-			            // Need to update adapater on main thread in order for list changes to update visually
+			            // Need to update adapter on main thread in order for list changes to update visually
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 mTodoItemAdapter.notifyDataSetChanged();
-
+				 Log.i(TAG, "List updated successfully");
+				
                                 if (mSwipeLayout.isRefreshing()) {
                                     mSwipeLayout.setRefreshing(false);
                                 }
