@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
 			//initialize SDK with IBM Bluemix application ID and route
 			//You can find your backendRoute and backendGUID in the Mobile Options section on top of your Bluemix application dashboard
             //TODO: Please replace <APPLICATION_ROUTE> with a valid ApplicationRoute and <APPLICATION_ID> with a valid ApplicationId
-            bmsClient.initialize(this, "<APPLICATION_ROUTE>", "<APPLICATION_ID>");
+            bmsClient.initialize(this, "<APPLICATION_ROUTE>", "<APPLICATION_ID>", BMSClient.REGION_US_SOUTH);// Be sure to update your region appropriately if you are not using US_SOUTH
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
