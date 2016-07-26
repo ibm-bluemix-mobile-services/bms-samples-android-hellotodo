@@ -58,14 +58,12 @@ Before you can run the helloTodo application, you must set up a mobile backend f
 ```Gradle
     compile group: 'com.ibm.mobilefirstplatform.clientsdk.android',
             name: 'core',
-            version: '1.+',
+            version: '2.+',
             ext: 'aar',
             transitive: true
 ```
 
 This section in `build.gradle` file tells Android Studio to automatically download the Bluemix Mobile Services Core SDK and add it to the project.
-
-> **Note**: This sample depends on 1.+ version of the Core SDK. The most recent 1.* version is downloaded automatically. When you are creating production applications, it is recommended to define the version explicitly (1.0.0 for example) to ensure consistent builds.
 
 3. After the gradle sync completes, open the `MainActivity.java` file and locate the `try` block within the `onCreate()` function.
 4. In the ```BMSClient.getInstance().initialize()``` function, replace the `<APPLICATION_ROUTE>` and ```<APPLICATION_ID>``` values with the application route and ID you were given when creating your application on Bluemix.
@@ -77,12 +75,13 @@ public void onCreate(Bundle savedInstanceState) {
 	setContentView(R.layout.activity_main);
 	client = BMSClient.getInstance();
 	try {
-		client.initialize(getApplicationContext(), "<APPLICATION_ROUTE>", "<APPLICATION_ID>");
+		client.initialize(getApplicationContext(), "<APPLICATION_ROUTE>", "<APPLICATION_ID>", BMSClient.REGION_US_SOUTH);
 	} catch (MalformedURLException e) {
 		throw new RuntimeException(e);
 	}
 }   
 ```
+> **Note**: If your Bluemix app is **not** hosted in US_SOUTH, be sure to update the region parameter appropriately: BMSClient.REGION_SYDNEY or BMSClient.REGION_UK.
 
 ### Run the helloTodo sample application
 
