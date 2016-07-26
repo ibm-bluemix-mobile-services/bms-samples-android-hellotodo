@@ -33,6 +33,7 @@ import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Request;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
+import com.ibm.mobilefirstplatform.clientsdk.android.security.mca.api.MCAAuthorizationManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,7 +73,7 @@ public class MainActivity extends Activity {
 			//initialize SDK with IBM Bluemix application ID and route
 			//You can find your backendRoute and backendGUID in the Mobile Options section on top of your Bluemix application dashboard
             //TODO: Please replace <APPLICATION_ROUTE> with a valid ApplicationRoute and <APPLICATION_ID> with a valid ApplicationId
-            bmsClient.initialize(this, "<APPLICATION_ROUTE>", "<APPLICATION_ID>", BMSClient.REGION_US_SOUTH);// Be sure to update your region appropriately if you are not using US_SOUTH
+            bmsClient.initialize(this, "<APPLICATION_ROUTE>", "<APPLICATION_ID>", BMSClient.REGION_US_SOUTH);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -80,6 +81,11 @@ public class MainActivity extends Activity {
         // Init UI
         initListView();
         initSwipeRefresh();
+
+        // Must create and set default MCA Auth Manager in order for the delete endpoint to work. This is new in core version 2.0.
+        MCAAuthorizationManager MCAAuthMan = MCAAuthorizationManager.createInstance(this);
+
+        bmsClient.setAuthorizationManager(MCAAuthMan);
     }
 
     @Override
